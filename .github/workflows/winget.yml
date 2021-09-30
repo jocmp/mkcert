@@ -1,11 +1,16 @@
 on: [push, pull_request]
 jobs:
   upload-windows-binary:
-      name: Upload to Winget registry
-      runs-on: windows-2019
-      steps:
-        - name: Display the path
-          run: echo ${env:test_var}
-          shell: powershell
-          env:
-            test_var: ${{ secrets.TEST_VAR }}
+    name: Upload to Winget registry
+    runs-on: windows-2019
+    steps:
+      - name: Update package manifest in the OWC
+        run: |
+          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          .\wingetcreate.exe update FiloSottile.Mkcert -u ${env:package_urls} -v ${env:manifest_version} -t ${env:github_token}
+        shell: powershell
+        env:
+          package_urls: https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-windows-amd64.exe
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          manifest_version: '0.0.1'
+
